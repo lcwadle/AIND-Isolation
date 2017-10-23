@@ -233,9 +233,52 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        best_score = float("-inf")
+        best_move = None
+        for m in game.get_legal_moves():
+            v = self.min_value(game.forecast_move(m), depth)
+            if v > best_score:
+                best_score = v
+                best_move = m
+        return best_move
 
+    def min_value(self, game, depth):
+        depth -= 1
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if self.terminal_test(game):
+            return 1
+
+        if depth == 0:
+            return self.score(game, game._active_player)
+
+        v = float("inf")
+        for m in game.get_legal_moves():
+            v = min(v, self.max_value(game.forecast_move(m), depth))
+        return v
+
+    def max_value(self, game, depth):
+        depth -= 1
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        if self.terminal_test(game):
+            return -1
+
+        if depth == 0:
+            return self.score(game, game._inactive_player)
+
+        v = float("-inf")
+        for m in game.get_legal_moves():
+            v = max(v, self.max_value(game.forecast_move(m), depth))
+        return v
+
+    def terminal_test(self, game):
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        return not bool(game.get_legal_moves())
 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
